@@ -1,4 +1,5 @@
 # coding=utf-8
+import re
 
 import main
 import vkontakte as vk
@@ -8,6 +9,10 @@ import telebot
 
 def send_post(group, post):
     text = post['text']
+
+    for vk_link, name in re.findall(r'\[(\w+)\|(\w+\s+\w+)\]', text):
+        text = text.replace(f'[{vk_link}|{name}]', f'<a href="https://vk.com/{vk_link}">{name}</a>')
+
     text = text.replace('<br>', '\n')
 
     photos = []
