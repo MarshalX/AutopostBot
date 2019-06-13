@@ -14,15 +14,15 @@ def get_connection():
     return connection
 
 
-def get_last_post(tg_id, vk_id):
+def get_last_posts(tg_id, vk_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT `last_post` FROM `groups` WHERE `vk_id`=%s AND `tg_id`=%s"
+            sql = "SELECT `last_post`, `pre_last_post` FROM `groups` WHERE `vk_id`=%s AND `tg_id`=%s"
             cursor.execute(sql, (vk_id * -1, tg_id))
             result = cursor.fetchone()
 
-            return result['last_post']
+            return result['last_post'], result['pre_last_post']
     finally:
         connection.close()
 
@@ -30,6 +30,12 @@ def get_last_post(tg_id, vk_id):
 def set_last_post(tg_id, vk_id, last_post):
     connection = get_connection()
     try:
+        with connection.cursor() as cursor:
+            sql = "UPDATE `groups` SET `pre_last_post` = `last_post` WHERE `vk_id`=%s AND `tg_id`=%s"
+            cursor.execute(sql, (vk_id, tg_id))
+
+        connection.commit()
+
         with connection.cursor() as cursor:
             sql = "UPDATE `groups` SET `last_post` = %s WHERE `vk_id`=%s AND `tg_id`=%s"
             cursor.execute(sql, (last_post, vk_id, tg_id))

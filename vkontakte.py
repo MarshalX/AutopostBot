@@ -68,7 +68,7 @@ def post_filter(tg_id, posts):
 
         if post["marked_as_ads"] == 1:
             continue
-        if db.get_last_post(tg_id, post["to_id"]) != post["id"]:
+        if post["id"] not in db.get_last_posts(tg_id, post["to_id"]):
             return post
         else:
             return False
