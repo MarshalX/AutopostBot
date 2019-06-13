@@ -22,20 +22,23 @@ def send_post(group, post):
             type = attachment['type']
 
             if type == 'photo':
-                photos.append(attachment[type]['src_big'])
+                for k, v in attachment[type].items():
+                    if k.startswith('photo_'):
+                        src = v
+                photos.append(src)
             elif type == 'audio':
                 audios.append((attachment[type]['url'], attachment[type]['artist'] + ' - ' + attachment[type]['title']))
             elif (type == 'doc') and (attachment[type]['ext'] == 'gif'):
                 docs.append((attachment[type]['url'], int(attachment[type]['size'])))
             elif type == 'video':
-                videos_data = '{}_{}'.format(attachment[type]['owner_id'], attachment[type]['vid'])
+                videos_data = '{}_{}'.format(attachment[type]['owner_id'], attachment[type]['id'])
                 video_url = vk.get_video(videos_data)
                 if video_url is not None:
                     videos.append(video_url)
             else:
                 another += 1
-    except KeyError:
-        pass
+    except KeyError as e:
+        print(e)
 
     # Отправка текста если отправляется пачка чего-то или нет аттачей
     if (text is not None) and (text != "") and (another == 0):
@@ -93,12 +96,12 @@ def send_post(group, post):
                     text = '<a href="{}">&#8203;</a>{}'.format(docs[0][0], text)
                     main.bot.send_message(group, text, parse_mode='HTML')
                 else:
-                    main.bot.send_document(chat_id=group, data=docs[0][0])
-                main.bot.send_document(group, docs[0], caption=text)
+                    main.bot.send_document(chat_id=group, data=docs[0][0], caption=text)
+                # main.bot.send_document(group, docs[0], caption=text)
             except:
                 pass
         else:
-            text = '<a href="{}">&#8203;</a>{}'.format(docs[0], text)
+            text = '<a href="{}">&#8203;</a>{}'.format(docs[0][0], text)
             main.bot.send_message(group, text, parse_mode='HTML')
 
         text = ""
@@ -119,4 +122,7 @@ def send_post(group, post):
 
     # Отправка всех аудио с поста. Внизу из-за приоритета отправки
     for id in range(0, len(audios)):
-        main.bot.send_audio(chat_id=group, audio=audios[id][0], caption=audios[id][1])
+        try:
+            main.bot.send_audio(chat_id=group, audio=audios[id][0], caption=audios[id][1])
+        except:
+            pass

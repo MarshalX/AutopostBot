@@ -98,5 +98,6 @@ def get_video(videos):
     for file in files:
         if file != 'external':
             video_url = files[file]
+            break
 
     return video_url

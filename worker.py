@@ -22,7 +22,7 @@ def main():
                 if post is not False:
                     print("Post {} in to {}".format(post['id'], tg_id))
                     tg.send_post('@' + tg_id, post)
-                #     db.set_last_post(tg_id, vk_id, post['id'])
+                    db.set_last_post(tg_id, vk_id, post['id'])
 
             print((str(datetime.now())).split('.')[0])
             sleep(300)
