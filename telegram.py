@@ -10,7 +10,7 @@ import telebot
 def send_post(group, post):
     text = post['text']
 
-    for vk_link, name in re.findall(r'\[(\w+)\|(\w+\s+\w+)\]', text):
+    for vk_link, name in re.findall(r"\[([^\]|]*)\|([^\]]*)\]", text):
         text = text.replace(f'[{vk_link}|{name}]', f'<a href="https://vk.com/{vk_link}">{name}</a>')
 
     text = text.replace('<br>', '\n')
@@ -101,7 +101,7 @@ def send_post(group, post):
                     text = '<a href="{}">&#8203;</a>{}'.format(docs[0][0], text)
                     main.bot.send_message(group, text, parse_mode='HTML')
                 else:
-                    main.bot.send_document(chat_id=group, data=docs[0][0], caption=text)
+                    main.bot.send_document(chat_id=group, data=docs[0][0], caption=text, parse_mode='HTML')
                 # main.bot.send_document(group, docs[0], caption=text)
             except:
                 pass
@@ -115,7 +115,7 @@ def send_post(group, post):
     if len(videos) == 1:
         if len(text) < 200:
             try:
-                main.bot.send_video(group, videos[0], caption=text)
+                main.bot.send_video(group, videos[0], caption=text, parse_mode='HTML')
                 # main.bot.send_document(group, videos[0], caption=text)
             except:
                 pass
