@@ -86,7 +86,7 @@ def send_post(group, post):
     # Если фотка одна, в зависимости от кол-ва текста выбираем способ отправки (прямой или обход)
     if len(photos) == 1:
         if len(text) < 200:
-            main.bot.send_photo(group, photos[0], caption=text)
+            main.bot.send_photo(group, photos[0], caption=text, parse_mode='HTML')
         else:
             text = '<a href="{}">&#8203;</a>{}'.format(photos[0], text)
             main.bot.send_message(group, text, parse_mode='HTML')
