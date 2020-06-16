@@ -17,7 +17,7 @@ headers = {
 
 
 def send(method, token=os.environ.get('vk_token'), **kwargs):
-    kwargs.update({'v': '5.0'})
+    kwargs.update({'v': '5.110'})
     params = ""
     try:
         for key, value in kwargs.items():
