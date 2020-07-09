@@ -28,9 +28,8 @@ def send_post(group, post):
 
             if type == 'photo':
                 for k, v in attachment[type].items():
-                    if k.startswith('photo_'):
-                        src = v
-                photos.append(src)
+                    if k.startswith('sizes'):
+                        photos.append(attachment[type]['sizes'][-1]['url'])
             elif type == 'audio':
                 audios.append((attachment[type]['url'], attachment[type]['artist'] + ' - ' + attachment[type]['title']))
             elif (type == 'doc') and (attachment[type]['ext'] == 'gif'):

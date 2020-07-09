@@ -18,14 +18,15 @@ def main():
                 vk_id = group['vk_id']
 
                 post = vk.get_post_for_publication(tg_id, vk_id)
-
+                # print(post)
                 if post is not False:
                     print("Post {} in to {}".format(post['id'], tg_id))
-                    tg.send_post('@' + tg_id, post)
+                    tg.send_post(tg_id, post)
                     db.set_last_post(tg_id, vk_id, post['id'])
 
             print((str(datetime.now())).split('.')[0])
-            sleep(300)
+            # sleep(300)
+            sleep(20)
     except Exception as e:
         print(e)
 

@@ -1,6 +1,9 @@
 # coding=utf-8
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import requests
 import json
 
@@ -17,7 +20,7 @@ headers = {
 
 
 def send(method, token=os.environ.get('vk_token'), **kwargs):
-    kwargs.update({'v': '5.110'})
+    kwargs.update({'v': '5.120'})
     params = ""
     try:
         for key, value in kwargs.items():
@@ -68,7 +71,7 @@ def post_filter(tg_id, posts):
 
         if post["marked_as_ads"] == 1:
             continue
-        if post["id"] not in db.get_last_posts(tg_id, post["to_id"]):
+        if post["id"] not in db.get_last_posts(tg_id, post["from_id"]):
             return post
         else:
             return False
