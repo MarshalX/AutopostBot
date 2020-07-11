@@ -31,6 +31,7 @@ def send(method, token=os.environ.get('vk_token'), **kwargs):
         sleep(1)
         return check(result)
     except Exception as e:
+        print(e)
         return False
 
 
