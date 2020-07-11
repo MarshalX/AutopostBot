@@ -1,9 +1,6 @@
 # coding=utf-8
 import os
 
-from dotenv import load_dotenv
-load_dotenv()
-
 import requests
 import json
 
@@ -30,13 +27,10 @@ def send(method, token=os.environ.get('vk_token'), **kwargs):
             URL.format(method, params, token),
             headers=headers
         )
-
         result = json.loads(r.text)
         sleep(1)
-
         return check(result)
     except Exception as e:
-        print(e)
         return False
 
 
@@ -62,6 +56,7 @@ def get_posts(vk_id, count):
 
 
 def post_filter(tg_id, posts):
+    posts.reverse()
     for post in posts:
         try:
             if post["is_pinned"] == 1:
@@ -71,11 +66,13 @@ def post_filter(tg_id, posts):
 
         if post["marked_as_ads"] == 1:
             continue
-        if post["id"] not in db.get_last_posts(tg_id, post["from_id"]):
+        # if post["id"] not in db.get_last_posts(tg_id, post["owner_id"]):/
+        #     return post
+        db_post = db.get_last_posts(tg_id, post['owner_id'])
+        if (post['id'] not in db_post) and (post['id'] > db_post[0]):
             return post
         else:
-            return False
-
+            continue
     return False
 
 

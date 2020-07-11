@@ -18,7 +18,6 @@ def main():
                 vk_id = group['vk_id']
 
                 post = vk.get_post_for_publication(tg_id, vk_id)
-                # print(post)
                 if post is not False:
                     print("Post {} in to {}".format(post['id'], tg_id))
                     tg.send_post(tg_id, post)
@@ -26,7 +25,7 @@ def main():
 
             print((str(datetime.now())).split('.')[0])
             # sleep(300)
-            sleep(20)
+            sleep(60)
     except Exception as e:
         print(e)
 
