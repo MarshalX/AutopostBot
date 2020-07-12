@@ -17,7 +17,7 @@ headers = {
 
 
 def send(method, token=os.environ.get('vk_token'), **kwargs):
-    kwargs.update({'v': '5.110'})
+    kwargs.update({'v': '5.120'})
     params = ""
     try:
         for key, value in kwargs.items():
@@ -59,6 +59,7 @@ def get_posts(vk_id, count):
 
 
 def post_filter(tg_id, posts):
+    posts.reverse()
     for post in posts:
         try:
             if post["is_pinned"] == 1:
@@ -68,11 +69,13 @@ def post_filter(tg_id, posts):
 
         if post["marked_as_ads"] == 1:
             continue
-        if post["id"] not in db.get_last_posts(tg_id, post["to_id"]):
+        # if post["id"] not in db.get_last_posts(tg_id, post["owner_id"]):/
+        #     return post
+        db_post = db.get_last_posts(tg_id, post['owner_id'])
+        if (post['id'] not in db_post) and (post['id'] > db_post[0]):
             return post
         else:
-            return False
-
+            continue
     return False
 
 

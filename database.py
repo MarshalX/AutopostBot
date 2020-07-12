@@ -5,7 +5,7 @@ import pymysql
 
 
 def get_connection():
-    connection = pymysql.connect(os.environ.get('db_host'),
+    connection = pymysql.connect(host=os.environ.get('db_host'),
                                  user=os.environ.get('db_user'),
                                  password=os.environ.get('db_password'),
                                  database=os.environ.get('db_name'),
