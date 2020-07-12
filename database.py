@@ -1,28 +1,39 @@
-# coding=utf-8
 import os
 
 import pymysql
 
 
 def get_connection():
-    connection = pymysql.connect(host=os.environ.get('db_host'),
-                                 user=os.environ.get('db_user'),
-                                 password=os.environ.get('db_password'),
-                                 database=os.environ.get('db_name'),
-                                 charset='utf8mb4',
-                                 cursorclass=pymysql.cursors.DictCursor)
-    return connection
+    return pymysql.connect(
+        host=os.environ.get('db_host'),
+        user=os.environ.get('db_user'),
+        password=os.environ.get('db_password'),
+        database=os.environ.get('db_name'),
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
 
 
-def get_last_posts(tg_id, vk_id):
+def is_duplicate_post(tg_id, vk_id, post_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT `last_post`, `pre_last_post` FROM `groups` WHERE `vk_id`=%s AND `tg_id`=%s"
-            cursor.execute(sql, (vk_id * -1, tg_id))
-            result = cursor.fetchone()
+            query = '''
+                SELECT
+                    COUNT(*)
+                FROM
+                    `groups`
+                WHERE
+                    `vk_id`= %s AND
+                    `tg_id`= %s AND
+                    `pre_last_post` != %s AND
+                    `last_post` != %s AND
+                    `last_post` < %s
+            '''
 
-            return result['last_post'], result['pre_last_post']
+            cursor.execute(query, (vk_id, tg_id, post_id, post_id, post_id))
+
+            return cursor.fetchone()['COUNT(*)'] != 0
     finally:
         connection.close()
 
@@ -31,29 +42,27 @@ def set_last_post(tg_id, vk_id, last_post):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "UPDATE `groups` SET `pre_last_post` = `last_post` WHERE `vk_id`=%s AND `tg_id`=%s"
-            cursor.execute(sql, (vk_id, tg_id))
+            query = 'UPDATE `groups` SET `pre_last_post` = `last_post` WHERE `vk_id`= %s AND `tg_id`= %s'
+            cursor.execute(query, (vk_id, tg_id))
 
         connection.commit()
 
         with connection.cursor() as cursor:
-            sql = "UPDATE `groups` SET `last_post` = %s WHERE `vk_id`=%s AND `tg_id`=%s"
-            cursor.execute(sql, (last_post, vk_id, tg_id))
+            query = 'UPDATE `groups` SET `last_post` = %s WHERE `vk_id`= %s AND `tg_id`= %s'
+            cursor.execute(query, (last_post, vk_id, tg_id))
 
         connection.commit()
     finally:
         connection.close()
 
 
-def get_group(group):
+def get_group(vk_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT `*` FROM `groups` WHERE `vk_id`=%s"
-            cursor.execute(sql, group)
-            result = cursor.fetchone()
+            cursor.execute('SELECT `*` FROM `groups` WHERE `vk_id` = %s', vk_id)
 
-            return result
+            return cursor.fetchone()
     finally:
         connection.close()
 
@@ -62,21 +71,19 @@ def get_all_groups():
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "SELECT `*` FROM `groups`"
-            cursor.execute(sql)
-            result = cursor.fetchall()
+            cursor.execute('SELECT `*` FROM `groups`')
 
-            return result
+            return cursor.fetchall()
     finally:
         connection.close()
 
 
-def add_group(tg_id, vk_id):
+def set_tg_id(group_id, tg_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            sql = "INSERT INTO `groups` (`tg_id`, `vk_id`) VALUES (%s, %s)"
-            cursor.execute(sql, (tg_id, vk_id))
+            query = 'UPDATE `groups` SET `tg_id` = %s WHERE `id`= %s'
+            cursor.execute(query, (tg_id, group_id))
 
         connection.commit()
     finally:

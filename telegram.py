@@ -1,10 +1,9 @@
-# coding=utf-8
 import re
 
-import main
-import vkontakte as vk
-
 import telebot
+
+import vkontakte as vk
+from main import bot
 
 
 def send_post(group, post):
@@ -33,7 +32,7 @@ def send_post(group, post):
             elif (type == 'doc') and (attachment[type]['ext'] == 'gif'):
                 docs.append((attachment[type]['url'], int(attachment[type]['size'])))
             elif type == 'video':
-                videos_data = '{}_{}'.format(attachment[type]['owner_id'], attachment[type]['id'])
+                videos_data = '{}_{}'.format(attachment[type]['owner_id'], attachment[type]['id_'])
                 video_url = vk.get_video(videos_data)
                 if video_url is not None:
                     videos.append(video_url)
@@ -48,54 +47,53 @@ def send_post(group, post):
                 (len(docs) > 1) or \
                 (len(videos) > 1) or \
                 (len(docs) == 0 and len(photos) == 0) and (len(videos) == 0):
-            main.bot.send_message(chat_id=group, text=text, parse_mode='HTML')
+            bot.send_message(chat_id=group, text=text, parse_mode='HTML')
 
             text = ""
 
     # Отправка пачки гифок
     if len(docs) > 1:
-        for id in range(0, len(docs)):
-            print(docs[id][1])
-            if docs[id][1] >= 20971520:
-                text = '<a href="{}">&#8203;</a>{}Test'.format(docs[id][0], text)
-                main.bot.send_message(group, text, parse_mode='HTML')
+        for id_ in range(0, len(docs)):
+            print(docs[id_][1])
+            if docs[id_][1] >= 20971520:
+                text = '<a href="{}">&#8203;</a>{}Test'.format(docs[id_][0], text)
+                bot.send_message(group, text, parse_mode='HTML')
             else:
-                main.bot.send_document(chat_id=group, data=docs[id][0])
+                bot.send_document(chat_id=group, data=docs[id_][0])
 
     # Грузим кучу ФОТОК если там больше одной
     if (len(photos) <= 10) and (len(photos) > 1):
         media = []
 
-        for id in range(0, len(photos)):
-            media.append(telebot.types.InputMediaPhoto(photos[id]))
+        for id_ in range(0, len(photos)):
+            media.append(telebot.types.InputMediaPhoto(photos[id_]))
 
-        main.bot.send_media_group(group, media)
+        bot.send_media_group(group, media)
 
     # Грузим кучу ВИДОСОВ если там больше одного
     if (len(videos) <= 10) and (len(videos) > 1):
         media = []
 
-        for id in range(0, len(videos)):
+        for id_ in range(0, len(videos)):
             # пробуем собрать альбом из видосов
             try:
-                media.append(telebot.types.InputMediaVideo(videos[id]))
+                media.append(telebot.types.InputMediaVideo(videos[id_]))
             except Exception as e:
                 print(e)
             continue
         # media может остаться пустым, также может вернуть ошибку от ТГ, например не удалось получить видос по url
         try:
-            main.bot.send_media_group(group, media)
+            bot.send_media_group(group, media)
         except Exception as e:
             print(e)
-
 
     # Если фотка одна, в зависимости от кол-ва текста выбираем способ отправки (прямой или обход)
     if len(photos) == 1:
         if len(text) < 200:
-            main.bot.send_photo(group, photos[0], caption=text, parse_mode='HTML')
+            bot.send_photo(group, photos[0], caption=text, parse_mode='HTML')
         else:
             text = '<a href="{}">&#8203;</a>{}'.format(photos[0], text)
-            main.bot.send_message(group, text, parse_mode='HTML')
+            bot.send_message(group, text, parse_mode='HTML')
 
         text = ""
 
@@ -105,15 +103,15 @@ def send_post(group, post):
             try:
                 if docs[0][1] >= 20971520:
                     text = '<a href="{}">&#8203;</a>{}'.format(docs[0][0], text)
-                    main.bot.send_message(group, text, parse_mode='HTML')
+                    bot.send_message(group, text, parse_mode='HTML')
                 else:
-                    main.bot.send_document(chat_id=group, data=docs[0][0], caption=text, parse_mode='HTML')
-                # main.bot.send_document(group, docs[0], caption=text)
+                    bot.send_document(chat_id=group, data=docs[0][0], caption=text, parse_mode='HTML')
+                # bot.send_document(group, docs[0], caption=text)
             except:
                 pass
         else:
             text = '<a href="{}">&#8203;</a>{}'.format(docs[0][0], text)
-            main.bot.send_message(group, text, parse_mode='HTML')
+            bot.send_message(group, text, parse_mode='HTML')
 
         text = ""
 
@@ -121,19 +119,19 @@ def send_post(group, post):
     if len(videos) == 1:
         if len(text) < 200:
             try:
-                main.bot.send_video(group, videos[0], caption=text, parse_mode='HTML')
-                # main.bot.send_document(group, videos[0], caption=text)
+                bot.send_video(group, videos[0], caption=text, parse_mode='HTML')
+                # bot.send_document(group, videos[0], caption=text)
             except:
                 pass
         else:
             text = '<a href="{}">&#8203;</a>{}'.format(videos[0], text)
-            main.bot.send_message(group, text, parse_mode='HTML')
+            bot.send_message(group, text, parse_mode='HTML')
 
         text = ""
 
     # Отправка всех аудио с поста. Внизу из-за приоритета отправки
-    for id in range(0, len(audios)):
+    for id_ in range(0, len(audios)):
         try:
-            main.bot.send_audio(chat_id=group, audio=audios[id][0], caption=audios[id][1])
+            bot.send_audio(chat_id=group, audio=audios[id_][0], caption=audios[id_][1])
         except:
             pass
