@@ -20,7 +20,7 @@ def main():
                 post = vk.get_post_for_publication(tg_id, vk_id)
                 if post is not False:
                     print("Post {} in to {}".format(post['id'], tg_id))
-                    tg.send_post(tg_id, post)
+                    tg.send_post(f'@{tg_id}', post)
                     db.set_last_post(tg_id, vk_id, post['id'])
 
             print((str(datetime.now())).split('.')[0])
