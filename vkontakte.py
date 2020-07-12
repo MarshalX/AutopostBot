@@ -69,13 +69,13 @@ def post_filter(tg_id, posts):
 
         if post["marked_as_ads"] == 1:
             continue
-        # if post["id"] not in db.get_last_posts(tg_id, post["owner_id"]):/
-        #     return post
-        db_post = db.get_last_posts(tg_id, post['owner_id'])
+
+        db_post = db.get_last_posts(tg_id[1], post['owner_id'])
         if (post['id'] not in db_post) and (post['id'] > db_post[0]):
             return post
         else:
             continue
+
     return False
 
 
@@ -94,7 +94,6 @@ def get_video(videos):
         return
 
     for video in res['response']['items']:
-
         files = video['files']
         break
 

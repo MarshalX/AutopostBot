@@ -71,14 +71,23 @@ def send_post(group, post):
 
         main.bot.send_media_group(group, media)
 
-    # Грузим кучу ВИДОСОВ если там больше одной
+    # Грузим кучу ВИДОСОВ если там больше одного
     if (len(videos) <= 10) and (len(videos) > 1):
         media = []
 
         for id in range(0, len(videos)):
-            media.append(telebot.types.InputMediaVideo(videos[id]))
+            # пробуем собрать альбом из видосов
+            try:
+                media.append(telebot.types.InputMediaVideo(videos[id]))
+            except Exception as e:
+                print(e)
+            continue
+        # media может остаться пустым, также может вернуть ошибку от ТГ, например не удалось получить видос по url
+        try:
+            main.bot.send_media_group(group, media)
+        except Exception as e:
+            print(e)
 
-        main.bot.send_media_group(group, media)
 
     # Если фотка одна, в зависимости от кол-ва текста выбираем способ отправки (прямой или обход)
     if len(photos) == 1:
