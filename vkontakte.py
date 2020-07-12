@@ -27,8 +27,10 @@ def send(method, token=os.environ.get('vk_token'), **kwargs):
             URL.format(method, params, token),
             headers=headers
         )
+
         result = json.loads(r.text)
         sleep(1)
+
         return check(result)
     except Exception as e:
         print(e)

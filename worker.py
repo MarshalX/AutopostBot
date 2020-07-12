@@ -24,8 +24,8 @@ def main():
                     db.set_last_post(tg_id, vk_id, post['id'])
 
             print((str(datetime.now())).split('.')[0])
-            # sleep(300)
-            sleep(60)
+            sleep(300)
+
     except Exception as e:
         print(e)
 
