@@ -47,10 +47,8 @@ def post_filter(tg_id, posts):
     for post in posts:
         if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
             continue
-
         if db.is_duplicate_post(tg_id, post['owner_id'], post['id']):
             continue
-
         return post
 
 

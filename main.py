@@ -43,6 +43,8 @@ def main():
                 if vk_id:
                     vk_id = -vk_id
 
+                sleep(2.5)
+
                 post = vk.get_post_for_publication(tg_id, vk_id)
                 if post:
                     tg.send_post(tg_id, post)
@@ -51,7 +53,7 @@ def main():
             except Exception as e:
                 logger.error(e)
 
-        sleep(30)
+        sleep(45)
 
 
 if __name__ == '__main__':
