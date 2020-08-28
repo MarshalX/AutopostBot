@@ -43,9 +43,7 @@ def send_post(group, post):
 
     # Отправка текста если отправляется пачка чего-то или нет аттачей
     if (text is not None) and (text != "") and (another == 0):
-        if (len(photos) > 1) or \
-                (len(docs) > 1) or \
-                (len(videos) > 1) or \
+        if (((len(photos) > 1) or (len(docs) > 1) or (len(videos) > 1)) and (len(text) > 200)) or \
                 (len(docs) == 0 and len(photos) == 0) and (len(videos) == 0):
             bot.send_message(chat_id=group, text=text, parse_mode='HTML')
 
@@ -56,16 +54,17 @@ def send_post(group, post):
         for id_ in range(0, len(docs)):
             print(docs[id_][1])
             if docs[id_][1] >= 20971520:
-                text = '<a href="{}">&#8203;</a>{}Test'.format(docs[id_][0], text)
-                bot.send_message(group, text, parse_mode='HTML')
+                txt = '<a href="{}">&#8203;</a>{}'.format(docs[id_][0], text)
+                bot.send_message(group, txt, parse_mode='HTML')
             else:
-                bot.send_document(chat_id=group, data=docs[id_][0])
+                bot.send_document(chat_id=group, caption=text, data=docs[id_][0])
 
     # Грузим кучу ФОТОК если там больше одной
     if (len(photos) <= 10) and (len(photos) > 1):
         media = []
 
-        for id_ in range(0, len(photos)):
+        media.append(telebot.types.InputMediaPhoto(photos[0], caption=text))
+        for id_ in range(1, len(photos)):
             media.append(telebot.types.InputMediaPhoto(photos[id_]))
 
         bot.send_media_group(group, media)
@@ -74,7 +73,8 @@ def send_post(group, post):
     if (len(videos) <= 10) and (len(videos) > 1):
         media = []
 
-        for id_ in range(0, len(videos)):
+        media.append(telebot.types.InputMediaVideo(videos[0], caption=text))
+        for id_ in range(1, len(videos)):
             # пробуем собрать альбом из видосов
             try:
                 media.append(telebot.types.InputMediaVideo(videos[id_]))
