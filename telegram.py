@@ -22,7 +22,7 @@ def send_post(group, post):
     another = 0
 
     try:
-        for attachment in post['attachments']:
+        for attachment in post.get('attachments', []):
             type = attachment['type']
 
             if type == 'photo':
@@ -32,7 +32,7 @@ def send_post(group, post):
             elif (type == 'doc') and (attachment[type]['ext'] == 'gif'):
                 docs.append((attachment[type]['url'], int(attachment[type]['size'])))
             elif type == 'video':
-                videos_data = '{}_{}'.format(attachment[type]['owner_id'], attachment[type]['id_'])
+                videos_data = '{}_{}'.format(attachment[type]['owner_id'], attachment[type]['id'])
                 video_url = vk.get_video(videos_data)
                 if video_url is not None:
                     videos.append(video_url)
