@@ -1,106 +1,72 @@
-# coding=utf-8
 import os
+import logging
+from time import sleep
 
 import requests
-import json
 
 import database as db
 
-from time import sleep
+logger = logging.getLogger(__name__)
 
-URL = "https://api.vk.com/method/{}?{}access_token={}"
+URL = 'https://api.vk.com/method/{}?access_token={}&{}'
 
-headers = {
+HEADERS = {
     'Content-type': 'application/json',
     'Cache-control': 'no-cache'
 }
 
 
 def send(method, token=os.environ.get('vk_token'), **kwargs):
-    kwargs.update({'v': '5.120'})
-    params = ""
+    kwargs['v'] = '5.120'
+
     try:
-        for key, value in kwargs.items():
-            params += "{}={}&".format(key, value)
+        params = '&'.join([f'{k}={v}' for k, v in kwargs.items()])
+        url = URL.format(method, token, params)
 
-        r = requests.get(
-            URL.format(method, params, token),
-            headers=headers
-        )
+        response = requests.get(url, headers=HEADERS).json()
 
-        result = json.loads(r.text)
-        sleep(1)
+        sleep(0.4)
 
-        return check(result)
+        if 'error' in response:
+            raise RuntimeError(response['error'])
+
+        return response
     except Exception as e:
-        print(e)
-        return False
-
-
-def check(result):
-    try:
-        temp = result["error"]
-        return False
-    except KeyError:
-        return result
+        logger.error(e)
 
 
 def get_posts(vk_id, count):
-    res = send("wall.get", owner_id=-1 * vk_id, count=count, filter='owner')
-    posts = []
-
-    if not res:
+    response = send('wall.get', owner_id=vk_id, count=count, filter='owner')
+    if not response:
         return
 
-    for post in res["response"]["items"]:
-        posts.append(post)
-
-    return posts
+    return [post for post in response['response']['items']]
 
 
 def post_filter(tg_id, posts):
-    posts.reverse()
     for post in posts:
-        try:
-            if post["is_pinned"] == 1:
-                continue
-        except KeyError:
-            pass
-
-        if post["marked_as_ads"] == 1:
+        if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
             continue
-        # if post["id"] not in db.get_last_posts(tg_id, post["owner_id"]):/
-        #     return post
-        db_post = db.get_last_posts(tg_id, post['owner_id'])
-        if (post['id'] not in db_post) and (post['id'] > db_post[0]):
-            return post
-        else:
+        if db.is_duplicate_post(tg_id, post['owner_id'], post['id']):
             continue
-    return False
+        return post
 
 
 def get_post_for_publication(tg_id, vk_id):
-    posts = get_posts(vk_id, 10)
-
-    return post_filter(tg_id, posts)
+    return post_filter(tg_id, get_posts(vk_id, 10)[::-1])
 
 
 def get_video(videos):
-    res = send("video.get", token=os.environ.get('vk_user_token'), videos=videos)
-    files = []
-    video_url = ''
+    res = send('video.get', videos=videos)
 
     if not res:
         return
 
+    files = {}
     for video in res['response']['items']:
-
         files = video['files']
         break
 
-    for file in files:
-        if file != 'external':
-            video_url = files[file]
-            break
-
-    return video_url
+    for k, v in files.items():
+        if k != 'external':
+            return v
