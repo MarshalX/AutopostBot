@@ -73,7 +73,7 @@ def send_post(group, post):
     if (len(videos) <= 10) and (len(videos) > 1):
         media = []
 
-        media.append(telebot.types.InputMediaPhoto(videos[0], caption=text))
+        media.append(telebot.types.InputMediaVideo(videos[0], caption=text))
         for id_ in range(1, len(videos)):
             # пробуем собрать альбом из видосов
             try:
