@@ -88,7 +88,7 @@ def post_filter(groups, posts):
 
 
 def get_posts_for_publication(groups):
-    return post_filter(groups, get_posts(groups, 2))
+    return post_filter(groups, get_posts(groups, 10))
 
 
 def get_and_convert_tg_id(g):
