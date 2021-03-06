@@ -79,13 +79,16 @@ def post_filter(groups, posts):
                     continue
                 if db.is_duplicate_post(tg_id, post['owner_id'], post['id']):
                     continue
+                if post in publication_posts:
+                    continue
+
                 publication_posts.append(post)
 
     return publication_posts
 
 
 def get_posts_for_publication(groups):
-    return post_filter(groups, get_posts(groups, 6))
+    return post_filter(groups, get_posts(groups, 2))
 
 
 def get_and_convert_tg_id(g):
