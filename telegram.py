@@ -2,6 +2,7 @@ import re
 
 import telebot
 
+import tgraph
 import vkontakte as vk
 from main import bot
 
@@ -9,10 +10,11 @@ from main import bot
 def send_post(group, post):
     text = post['text']
 
+    text.replace("<", "&lt")
+    text.replace(">", "&gt")
+
     for vk_link, name in re.findall(r"\[([^\]|]*)\|([^\]]*)\]", text):
         text = text.replace(f'[{vk_link}|{name}]', f'<a href="https://vk.com/{vk_link}">{name}</a>')
-
-    text = text.replace('<br>', '\n')
 
     photos = []
     docs = []
@@ -42,22 +44,39 @@ def send_post(group, post):
         print(e)
 
     # Отправка текста если отправляется пачка чего-то или нет аттачей
-    if (text is not None) and (text != "") and (another == 0):
+    if (text is not None) and (text != "") and (another == 0) and (len(text) < 4095):
         if (((len(photos) > 1) or (len(docs) > 1) or (len(videos) > 1) and (len(audios) > 1)) and (len(text) > 200)) or \
                 (len(docs) == 0 and len(photos) == 0) and (len(videos) == 0) and (len(audios) == 0):
-            bot.send_message(chat_id=group, text=text, parse_mode='HTML')
+            try:
+                bot.send_message(chat_id=group, text=text, parse_mode='HTML')
+            except:
+                pass
 
             text = ""
+
+    elif len(text) > 4095:
+        text = text.replace("\n", '<br>')
+        author = bot.get_chat(group).title
+        preface = text.split("<br>")[0]
+        if len(preface) > 256:
+            preface = preface.split(".")[0] + "..."
+            if len(preface) > 256:
+                preface = "Новая публикация"
+        text = tgraph.post(preface, author, text)
+        bot.send_message(chat_id=group, text=f'<a href="{text}">{preface}</a>', parse_mode='HTML')
+        text = ""
 
     # Отправка пачки гифок
     if len(docs) > 1:
         for id_ in range(0, len(docs)):
-            print(docs[id_][1])
-            if docs[id_][1] >= 20971520:
-                txt = '<a href="{}">&#8203;</a>{}'.format(docs[id_][0], text)
-                bot.send_message(group, txt, parse_mode='HTML')
-            else:
-                bot.send_document(chat_id=group, caption=text, data=docs[id_][0], parse_mode='HTML')
+            try:
+                if docs[id_][1] >= 20971520:
+                    txt = '<a href="{}">&#8203;</a>{}'.format(docs[id_][0], text)
+                    bot.send_message(group, txt, parse_mode='HTML')
+                else:
+                    bot.send_document(chat_id=group, caption=text, data=docs[id_][0], parse_mode='HTML')
+            except:
+                pass
 
     # Грузим кучу ФОТОК если там больше одной
     if (len(photos) <= 10) and (len(photos) > 1):
@@ -106,7 +125,6 @@ def send_post(group, post):
                     bot.send_message(group, text, parse_mode='HTML')
                 else:
                     bot.send_document(chat_id=group, data=docs[0][0], caption=text, parse_mode='HTML')
-                # bot.send_document(group, docs[0], caption=text)
             except:
                 pass
         else:

@@ -36,59 +36,46 @@ def send(method, token=os.environ.get('vk_token'), **kwargs):
         logger.error(e)
 
 
-def construct(**kwargs):
-    params = ','.join([f"'{k}':'{v}'" for k, v in kwargs.items()])
-    method = "API.wall.get({" + params + "})"
-
-    return method
-
-
-def execute(groups, posts_count):
-    code_line = 'return ['
+def get_posts(groups, count=50):
+    source_ids = []
 
     for group in groups:
         vk_id = -group['vk_id']
-        code_line += construct(owner_id=vk_id, count=posts_count, filter='owner') + ', '
+        source_ids.append(vk_id)
 
-    code_line += '];'
-
-    response = send('execute', code=code_line)
+    response = send('newsfeed.get', source_ids=source_ids, count=count, filters='post')
 
     if not response:
         return
 
-    return response
-
-
-def get_posts(groups, count):
-    response = execute(groups, count)
-    groups_num = len(response['response'])
-
-    return [post for i in range(groups_num) for post in response['response'][i]['items'][::-1]]
+    return [post for post in response['response']['items'][::-1]]
 
 
 def post_filter(groups, posts):
     publication_posts = []
 
     for post in posts:
-        for group in groups:
-            if -group['vk_id'] == post['owner_id']:
-                tg_id = get_and_convert_tg_id(group)
 
-                if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
-                    continue
-                if db.is_duplicate_post(tg_id, post['owner_id'], post['id']):
-                    continue
-                if post in publication_posts:
-                    continue
+        if post['post_type'] == 'post' or post['type'] == 'post':
+            for group in groups:
 
-                publication_posts.append(post)
+                if -group['vk_id'] == post['source_id']:
+                    tg_id = get_and_convert_tg_id(group)
+
+                    if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
+                        continue
+                    if db.is_duplicate_post(tg_id, post['source_id'], post['post_id']):
+                        continue
+                    if post in publication_posts:
+                        continue
+
+                    publication_posts.append(post)
 
     return publication_posts
 
 
 def get_posts_for_publication(groups):
-    return post_filter(groups, get_posts(groups, 10))
+    return post_filter(groups, get_posts(groups, 50))
 
 
 def get_and_convert_tg_id(g):
