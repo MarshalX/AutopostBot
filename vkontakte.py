@@ -5,6 +5,7 @@ from time import sleep
 import requests
 
 import database as db
+from main import bot
 
 logger = logging.getLogger(__name__)
 
@@ -35,25 +36,60 @@ def send(method, token=os.environ.get('vk_token'), **kwargs):
         logger.error(e)
 
 
-def get_posts(vk_id, count):
-    response = send('wall.get', owner_id=vk_id, count=count, filter='owner')
+def get_posts(groups, count=50):
+    source_ids = []
+
+    for group in groups:
+        vk_id = -group['vk_id']
+        source_ids.append(vk_id)
+
+    response = send('newsfeed.get', source_ids=source_ids, count=count, filters='post')
+
     if not response:
         return
 
-    return [post for post in response['response']['items']]
+    return source_ids, [post for post in response['response']['items'][::-1]]
 
 
-def post_filter(tg_id, posts):
+def post_filter(response):
+    publication_posts = []
+
+    vk_pubs = set(response[0])
+    posts = response[1]
+
     for post in posts:
-        if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
-            continue
-        if db.is_duplicate_post(tg_id, post['owner_id'], post['id']):
-            continue
-        return post
+
+        if post['post_type'] == 'post' or post['type'] == 'post':
+            for group in vk_pubs:
+
+                if group == post['source_id']:
+                    tg_id = get_and_convert_tg_id(db.get_group(-group))
+
+                    if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
+                        continue
+                    if db.is_duplicate_post(tg_id, post['source_id'], post['post_id']):
+                        continue
+
+                    publication_posts.append(post)
+
+    return publication_posts
 
 
-def get_post_for_publication(tg_id, vk_id):
-    return post_filter(tg_id, get_posts(vk_id, 10)[::-1])
+def get_posts_for_publication(groups):
+    return post_filter(get_posts(groups, 50))
+
+
+def get_and_convert_tg_id(g):
+    try:
+        return int(g['tg_id'])
+    except ValueError:
+        if not g['tg_id'].startswith('@'):
+            g['tg_id'] = f'@{g["tg_id"]}'
+
+        tg_id = bot.get_chat(g['tg_id']).id
+        db.set_tg_id(g['id'], tg_id)
+
+        return tg_id
 
 
 def get_video(videos):

@@ -30,7 +30,7 @@ def is_duplicate_post(tg_id, vk_id, post_id):
                     `last_post` != %s AND
                     `last_post` < %s
             '''
-            cursor.execute(query, (vk_id*-1, tg_id, post_id, post_id, post_id))
+            cursor.execute(query, (-vk_id, tg_id, post_id, post_id, post_id))
 
             return cursor.fetchone()['COUNT(*)'] == 0
     finally:
@@ -42,13 +42,13 @@ def set_last_post(tg_id, vk_id, last_post):
     try:
         with connection.cursor() as cursor:
             query = 'UPDATE `groups` SET `pre_last_post` = `last_post` WHERE `vk_id`= %s AND `tg_id`= %s'
-            cursor.execute(query, (vk_id*-1, tg_id))
+            cursor.execute(query, (-vk_id, tg_id))
 
         connection.commit()
 
         with connection.cursor() as cursor:
             query = 'UPDATE `groups` SET `last_post` = %s WHERE `vk_id`= %s AND `tg_id`= %s'
-            cursor.execute(query, (last_post, vk_id*-1, tg_id))
+            cursor.execute(query, (last_post, -vk_id, tg_id))
 
         connection.commit()
     finally:
