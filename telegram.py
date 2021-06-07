@@ -5,13 +5,13 @@ import telebot
 import tgraph
 import vkontakte as vk
 from main import bot
+from html import escape
 
 
 def send_post(group, post):
     text = post['text']
 
-    text.replace("<", "&lt")
-    text.replace(">", "&gt")
+    text = escape(text)
 
     for vk_link, name in re.findall(r"\[([^\]|]*)\|([^\]]*)\]", text):
         text = text.replace(f'[{vk_link}|{name}]', f'<a href="https://vk.com/{vk_link}">{name}</a>')

@@ -1,8 +1,9 @@
+import os
 from telegraph import Telegraph
 
 
 telegraph = Telegraph()
-telegraph.create_account(short_name='1337')
+telegraph.create_account(short_name=os.environ.get('telegraph'))
 
 
 def post(name, author, text):

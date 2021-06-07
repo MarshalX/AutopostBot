@@ -48,25 +48,26 @@ def get_posts(groups, count=50):
     if not response:
         return
 
-    return [post for post in response['response']['items'][::-1]]
+    return source_ids, [post for post in response['response']['items'][::-1]]
 
 
-def post_filter(groups, posts):
+def post_filter(response):
     publication_posts = []
+
+    vk_pubs = set(response[0])
+    posts = response[1]
 
     for post in posts:
 
         if post['post_type'] == 'post' or post['type'] == 'post':
-            for group in groups:
+            for group in vk_pubs:
 
-                if -group['vk_id'] == post['source_id']:
-                    tg_id = get_and_convert_tg_id(group)
+                if group == post['source_id']:
+                    tg_id = get_and_convert_tg_id(db.get_group(-group))
 
                     if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
                         continue
                     if db.is_duplicate_post(tg_id, post['source_id'], post['post_id']):
-                        continue
-                    if post in publication_posts:
                         continue
 
                     publication_posts.append(post)
@@ -75,7 +76,7 @@ def post_filter(groups, posts):
 
 
 def get_posts_for_publication(groups):
-    return post_filter(groups, get_posts(groups, 50))
+    return post_filter(get_posts(groups, 50))
 
 
 def get_and_convert_tg_id(g):
