@@ -59,7 +59,7 @@ def get_group(vk_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT `*` FROM `groups` WHERE `vk_id` = %s', vk_id)
+            cursor.execute('SELECT * FROM `groups` WHERE `vk_id` = %s', vk_id)
 
             return cursor.fetchone()
     finally:
@@ -70,7 +70,7 @@ def get_all_groups():
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT `*` FROM `groups`')
+            cursor.execute('SELECT * FROM `groups`')
 
             return cursor.fetchall()
     finally:
