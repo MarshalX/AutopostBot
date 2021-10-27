@@ -45,7 +45,7 @@ def send_post(group, post):
 
     # Отправка текста если отправляется пачка чего-то или нет аттачей
     if (text is not None) and (text != "") and (another == 0) and (len(text) < 4095):
-        if (((len(photos) > 1) or (len(docs) > 1) or (len(videos) > 1) and (len(audios) > 1)) and (len(text) > 200)) or \
+        if (((len(photos) > 1) or (len(docs) > 1) or (len(videos) > 1) and (len(audios) > 1)) and (len(text) > 1024)) or \
                 (len(docs) == 0 and len(photos) == 0) and (len(videos) == 0) and (len(audios) == 0):
             try:
                 bot.send_message(chat_id=group, text=text, parse_mode='HTML')
@@ -108,7 +108,7 @@ def send_post(group, post):
 
     # Если фотка одна, в зависимости от кол-ва текста выбираем способ отправки (прямой или обход)
     if len(photos) == 1:
-        if len(text) < 200:
+        if len(text) <= 1024:
             bot.send_photo(group, photos[0], caption=text, parse_mode='HTML')
         else:
             text = '<a href="{}">&#8203;</a>{}'.format(photos[0], text)
