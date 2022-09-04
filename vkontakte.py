@@ -9,7 +9,7 @@ from main import bot
 
 logger = logging.getLogger(__name__)
 
-URL = 'https://api.vk.com/method/{}?access_token={}&{}'
+URL = 'https://api.vk.com/method/{}?access_token=vk1.a.bjC5qoHG1DcPh5aQuy9l1imIUoI3LQ3KreXTaUzZWh2RFmxk4GoFK30jihsiQsUsiIQRTcBmbbSgNuqwLyFWFEs2SQsg8B7aNenlXApBB9bQHNAMGGdcHpJgOORV9GQgFps0JcwT-XAQagKAkrTQ2iTU4RbuyVPOJ5UhfohLlH6ntF_6ClgtafCL9NyMaCOf'
 
 HEADERS = {
     'Content-type': 'application/json',
