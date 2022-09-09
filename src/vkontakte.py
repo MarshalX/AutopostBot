@@ -8,10 +8,7 @@ from log import logger
 
 URL = 'https://api.vk.com/method/{}?access_token={}&{}'
 API_VERSION = '5.120'
-HEADERS = {
-    'Content-type': 'application/json',
-    'Cache-control': 'no-cache'
-}
+HEADERS = {'Content-type': 'application/json', 'Cache-control': 'no-cache'}
 
 DEFAULT_POST_COUNT = 100
 
@@ -59,6 +56,7 @@ def post_filter(response):
         is_post = post['post_type'] == 'post' or post['type'] == 'post'
         if post['source_id'] in vk_pubs and is_post:
             from telegram import get_and_convert_id
+
             tg_id = get_and_convert_id(db.get_group(-post['source_id']))
 
             if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):

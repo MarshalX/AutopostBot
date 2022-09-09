@@ -3,10 +3,10 @@ from html import escape
 
 import telebot
 
-import tgraph
-from log import logger
 import database as db
+import tgraph
 import vkontakte as vk
+from log import logger
 from main import bot
 
 
@@ -46,10 +46,12 @@ def send_post(group, post):
             if attach_type == 'photo':
                 photos.append(attachment[attach_type]['sizes'][-1]['url'])
             elif attach_type == 'audio':
-                audios.append((
-                    attachment[attach_type]['url'],
-                    f"{attachment[attach_type]['artist']} - {attachment[attach_type]['title']}"
-                ))
+                audios.append(
+                    (
+                        attachment[attach_type]['url'],
+                        f"{attachment[attach_type]['artist']} - {attachment[attach_type]['title']}",
+                    )
+                )
             elif attach_type == 'doc' and attachment[attach_type]['ext'] == 'gif':
                 docs.append((attachment[attach_type]['url'], int(attachment[attach_type]['size'])))
             elif attach_type == 'video':
@@ -65,8 +67,12 @@ def send_post(group, post):
 
     # Отправка текста если отправляется пачка чего-то или нет attachments
     if (text is not None) and (text != "") and (another == 0) and (len(text) < 4095):
-        if (((len(photos) > 1) or (len(docs) > 1) or (len(videos) > 1) and (len(audios) > 1)) and (len(text) > 1024)) or \
-                (len(docs) == 0 and len(photos) == 0) and (len(videos) == 0) and (len(audios) == 0):
+        if (
+            (((len(photos) > 1) or (len(docs) > 1) or (len(videos) > 1) and (len(audios) > 1)) and (len(text) > 1024))
+            or (len(docs) == 0 and len(photos) == 0)
+            and (len(videos) == 0)
+            and (len(audios) == 0)
+        ):
             try:
                 bot.send_message(chat_id=group, text=text, parse_mode='HTML')
             except:

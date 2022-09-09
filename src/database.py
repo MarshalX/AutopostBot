@@ -1,5 +1,4 @@
 import os
-
 import sqlite3
 
 RawData = dict[str, any]

@@ -3,10 +3,10 @@ from time import sleep
 
 import telebot
 
-from log import logger
 import database as db
 import telegram as tg
 import vkontakte as vk
+from log import logger
 
 bot = telebot.TeleBot(os.environ.get('bot_token'))
 

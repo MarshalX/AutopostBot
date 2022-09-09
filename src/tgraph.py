@@ -1,6 +1,6 @@
 import os
-from telegraph import Telegraph
 
+from telegraph import Telegraph
 
 telegraph = Telegraph()
 telegraph.create_account(short_name=os.environ.get('telegraph', 'Telegraph'))
