@@ -2,7 +2,6 @@ import os
 
 import logging
 from time import sleep
-from datetime import datetime
 
 import telebot
 
@@ -36,17 +35,22 @@ def main():
 
     while True:
         groups = db.get_all_groups()
+        logger.info(f'Fetch {len(groups)} groups')
 
         try:
             posts = vk.get_posts_for_publication(groups)
+            logger.info(f'Fetch {len(posts)} posts')
+
             for post in posts:
                 for group in groups:
+                    logger.info(f'Processing group {group["id"]}')
+
                     if -group['vk_id'] == post['source_id']:
                         sleep(0.25)
                         tg_id = get_and_convert_tg_id(group)
                         try:
                             tg.send_post(tg_id, post)
-                            db.set_last_post(tg_id, -group['vk_id'], post['post_id'])
+                            db.set_last_post(tg_id, group['vk_id'], post['post_id'])
                             logger.info(f'Post {post["post_id"]} into {tg_id}')
                         except Exception as e:
                             logger.error(e)

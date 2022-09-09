@@ -67,7 +67,7 @@ def post_filter(response):
 
                     if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
                         continue
-                    if db.is_duplicate_post(tg_id, post['source_id'], post['post_id']):
+                    if db.is_duplicate_post(tg_id, -post['source_id'], post['post_id']):
                         continue
 
                     publication_posts.append(post)
