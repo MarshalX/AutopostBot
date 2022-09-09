@@ -32,7 +32,7 @@ def is_duplicate_post(tg_id: str, vk_id: int, post_id: int) -> bool:
         return cur.fetchone()['COUNT(*)'] == 0
 
 
-def set_last_post(tg_id: str, vk_id: int, last_post: int) -> None:
+def set_last_post(tg_id: int | str, vk_id: int, last_post: int) -> None:
     with get_connection() as con:
         query = 'UPDATE `groups` SET `pre_last_post` = `last_post` WHERE `vk_id`= ? AND `tg_id`= ?'
         con.execute(query, (vk_id, tg_id))
