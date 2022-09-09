@@ -1,4 +1,4 @@
 # Python 3.10
-pyTelegramBotAPI
-telegraph
-requests==2.28.1
+pyTelegramBotAPI==3.7.9
+telegraph==1.4.1
+requests==2.25.1
