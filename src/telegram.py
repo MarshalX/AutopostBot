@@ -66,13 +66,9 @@ def send_post(group, post):
         logger.error(e)
 
     # Отправка текста если отправляется пачка чего-то или нет attachments
-    if (text is not None) and (text != "") and (another == 0) and (len(text) < 4095):
-        if (
-            (((len(photos) > 1) or (len(docs) > 1) or (len(videos) > 1) and (len(audios) > 1)) and (len(text) > 1024))
-            or (len(docs) == 0 and len(photos) == 0)
-            and (len(videos) == 0)
-            and (len(audios) == 0)
-        ):
+    with_attachments = len(photos) + len(docs) + len(videos) + len(audios) != 0
+    if text and not another and len(text) < 4095:
+        if (with_attachments and len(text) > 1024) or not with_attachments:
             try:
                 bot.send_message(chat_id=group, text=text, parse_mode='HTML')
             except:
