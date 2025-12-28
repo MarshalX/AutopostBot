@@ -42,7 +42,7 @@ def get_posts(groups, count=DEFAULT_POST_COUNT):
     response = send('newsfeed.get', source_ids=source_ids, count=count, filters='post', max_photos=100, return_banned=1)
 
     if not response:
-        return
+        return source_ids, []
 
     return source_ids, list(reversed(response['response']['items']))
 
