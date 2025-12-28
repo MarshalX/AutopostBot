@@ -54,17 +54,25 @@ def post_filter(response):
     publication_posts = []
     for post in posts:
         is_post = post['post_type'] == 'post' or post['type'] == 'post'
-        if post['source_id'] in vk_pubs and is_post:
-            from telegram import get_and_convert_id
+        if not is_post:
+            continue
 
-            tg_id = get_and_convert_id(db.get_group(-post['source_id']))
+        is_repost = 'copy_history' in post
+        if is_repost:
+            continue
 
-            if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
-                continue
-            if db.is_duplicate_post(tg_id, -post['source_id'], post['post_id']):
-                continue
+        if post['source_id'] not in vk_pubs:
+            continue
 
-            publication_posts.append(post)
+        from telegram import get_and_convert_id
+        tg_id = get_and_convert_id(db.get_group(-post['source_id']))
+
+        if post.get('is_pinned', 0) or post.get('marked_as_ads', 0):
+            continue
+        if db.is_duplicate_post(tg_id, -post['source_id'], post['post_id']):
+            continue
+
+        publication_posts.append(post)
 
     return publication_posts
 

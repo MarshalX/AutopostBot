@@ -51,8 +51,8 @@ def send_post(tg_id: int, post: dict) -> None:
 
     unknown_attachments_count = 0
 
-    try:
-        for attachment in post.get('attachments', []):
+    for attachment in post.get('attachments', []):
+        try:
             attach_type = attachment['type']
 
             if attach_type == 'photo':
@@ -73,9 +73,13 @@ def send_post(tg_id: int, post: dict) -> None:
                 if video_url is not None:
                     videos.append(video_url)
             else:
+                logger.warning(f'Unknown attachment type: {attach_type}')
                 unknown_attachments_count += 1
-    except KeyError as e:
-        logger.error(e)
+        except KeyError as e:
+            logger.error(e)
+
+    if unknown_attachments_count:
+        logger.warning(f'Unknown attachments count: {unknown_attachments_count}')
 
     # Отправка текста если отправляется пачка чего-то или нет attachments
     with_attachments = len(photos) + len(docs) + len(videos) + len(audios) != 0
